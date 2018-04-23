@@ -17,54 +17,74 @@ class Player(spgl.Sprite):
 		self.shape("triangle")
 		self.speed = 1
 		self.y_acceleration = 0 
-		self.y_speed = 5
-		self.strength = 7 
+		self.x_acceleration = 0 
+		self.y_speed = 4
+		self.x_speed = 0
+		self.strength = 4
 		self.score 
 		self.state = "running" 
 		self.frame = 0 
+		
+	def tick(self): 
+		self.setx(self.xcor())
+		
+		if game.is_collision(self, pipe):
+			self.y_acceleration = 0 
+			self.y_speed = 0 
+			self.sety(pipe.ycor() + pipe.height +1)
+			self.state = "running"
 			
-	def tick(self):
-		self.move()
-
-	def move(self):
-		self.fd(self.speed)
-
-		if self.xcor() > game.SCREEN_WIDTH / 2:
-			self.goto(-game.SCREEN_WIDTH / 2, self.ycor())
-
-		if self.xcor() < -game.SCREEN_WIDTH /2 :
-			self.goto(game.SCREEN_WIDTH / 2, self.ycor())
-
-		if self.ycor() > game.SCREEN_HEIGHT / 2:
-			self.goto(self.xcor(), -game.SCREEN_HEIGHT / 2)
-
-		if self.ycor() < -game.SCREEN_HEIGHT / 2:
-			self.goto(self.xcor(), game.SCREEN_HEIGHT / 2)
-            
-	def jump(self):
-		if self.state == "running": 
-			self.y_acceleration += self.strength
-			self.sety(0)
-			self.state = "jumping"
-			
-		def tick(self): 
-			self.setx(self.xcor())
-			if self.ycor() < - 100: 
-				self.y_acceleration = 0 
-				self.y_speed = 0 
-				self.sety(-100)
-				self.state = "running"
-			
+		elif game.is_collision(self, block):
+			self.y_acceleration = 0 
+			self.y_speed = 0 
+			self.sety(block.ycor() + block.height +1)
+			self.state = "running"	
+	
+		else:
 			self.y_acceleration += game.gravity 
 			self.y_speed += self.y_acceleration 
 			self.sety(self.ycor() + self.y_speed)
 		
+		self.x_speed += self.x_acceleration 
+		if self.x_speed > 3:
+			self.x_speed = 3
+			
+		if self.x_speed < -3:
+			self.x_speed = -3
+		self.setx(self.xcor() + self.x_speed)
+            
+	def jump(self):
+		if self.state == "running": 
+			self.y_acceleration += self.strength
+			self.state = "jumping"
+			
 	def turn_left(self):
-		self.lt(30)
+		self.x_acceleration -= 1 
+		if self.x_acceleration < -3:
+			self.x_acceleration = -3
 
 	def turn_right(self):
-		self.rt(30)
+		self.x_acceleration += 1 
+		if self.x_acceleration > 3:
+			self.x_acceleration = 1
 
+#should be outside of class	
+def isCollision(player, rock): 
+	player = player.xcor()-rock.xcor()
+	rock = player.ycor()-rock.ycor()
+	distance = math.sqrt((player ** 2) + (rock ** 2)) 
+		
+	if distance < 20: 
+		return True 
+	else: 
+		return False 
+
+class Game(spgl.Sprite):
+	def __init__(self, shape, color, x, y):
+		spgl.Sprite.__init__(self, shape, color, x, y)
+		
+		#def jump_sound(self, player_sound); 
+		
 class Rock(spgl.Sprite):
 	def __init__(self, shape, color, x, y):
 		spgl.Sprite.__init__(self, shape, color, x, y)
@@ -72,8 +92,13 @@ class Rock(spgl.Sprite):
 class Coin(spgl.Sprite):
 	def __init__(self, shape, color, x, y):
 		spgl.Sprite.__init__(self, shape, color, x, y)
-    	
+		
 class Block(spgl.Sprite):
+	def __init__(self, shape, color, x, y):
+		spgl.Sprite.__init__(self, shape, color, x, y) 
+		self.speed = 1
+
+class Pipe(spgl.Sprite): 
 	def __init__(self, shape, color, x, y):
 		spgl.Sprite.__init__(self, shape, color, x, y) 
 		self.speed = 1
@@ -84,12 +109,24 @@ class Block(spgl.Sprite):
 # Initial Game setup
 game = spgl.Game(800, 600, "black", "SPGL Minimum Code Example by /u/wynand1004 AKA @TokyoEdTech", 0)
 game.coins = 10
-game.gravity = -1
+game.gravity = -0.3
 
 # Create Sprites / player
-player = Player("triangle", "white", -350, 0)
-rock = Rock("circle", "red", -300, 0)
-Block = Block("square", "blue", -190, 0)
+#player = Player("triangle", "white", -310, 100)
+player = Player("triangle", "white", 300, -250)
+player.set_image("mario.gif", 50, 60)
+
+rock = Rock("circle", "red", 110, -55)
+rock.set_image("rock.gif", 25, 25)
+
+block = Block("square", "blue", 150 , -100)
+block.set_image("brick2.gif", 150, 50)
+
+pipe = Pipe("triangle", "blue", 300, -250)
+pipe.set_image("pipe.gif", 80, 80)
+
+coin = Coin("circle", "red", -50 , 100) 
+coin.set_image("coins.gif", 30, 20) 
 
 # Create Labels
 score_label = spgl.Label("Score : {}  Lives : {} ".format(game.coins, player.lives), "white", -380, 280)
@@ -102,14 +139,18 @@ game.set_keyboard_binding(spgl.KEY_RIGHT, player.turn_right)
 while True:
     # Call the game tick method
 	game.tick()
-    
+     
+    #for rock in rocks:
 	if game.is_collision(player, rock): 
-		player.score -= 5 
+		player.score -= 10 
 	else:
-		player.score += 5
-    
-
-    	
+		player.score += 0
+		
+	if game.is_collision(player, coin): 
+		player.score += 5 
+	else: 
+		player.score += 0 
+		
     
     	
     
