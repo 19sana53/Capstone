@@ -20,54 +20,45 @@ class Player(spgl.Sprite):
 		self.x_acceleration = 0 
 		self.y_speed = 4
 		self.x_speed = 0
-		self.strength = 3
+		self.strength = 6
 		self.score 
 		self.state = "running" 
 		self.frame = 0 
 		
-	def tick(self): 
-		self.setx(self.xcor())
+	def tick(self): 	
+		if self.state == "jumping":	
+			self.sety(self.ycor() + self.y_speed)
+			self.y_acceleration += game.gravity 
+			self.y_speed += self.y_acceleration 
+					
+		self.setx(self.xcor() + self.x_speed)
+		
+		for block in blocks:
+			if game.is_collision(self, block):
+				self.y_acceleration = 0 
+				self.y_speed = 0 
+				self.sety(block.ycor() + block.height +1)
+				self.state = "running"	
 		
 		if game.is_collision(self, pipe):
 			self.y_acceleration = 0 
 			self.y_speed = 0 
-			self.sety(pipe.ycor() + pipe.height + 1)
+			self.sety(pipe.ycor() + pipe.height + 5)
 			self.state = "running"
-			
-		elif game.is_collision(self, block):
-			self.y_acceleration = 0 
-			self.y_speed = 0 
-			self.sety(block.ycor() + block.height +1)
-			self.state = "running"	
-	
-		else:
-			self.sety(self.ycor() + self.y_speed)
-			self.y_acceleration += game.gravity 
-			self.y_speed += self.y_acceleration 
-			
-		self.x_speed += self.x_acceleration 
-		if self.x_speed > 3:
-			self.x_speed = 3
-			
-		if self.x_speed < -3:
-			self.x_speed = -3
-		self.setx(self.xcor() + self.x_speed)
-            
+
+
 	def jump(self):
 		if self.state == "running": 
 			self.y_acceleration += self.strength
 			self.state = "jumping"
 			self.sety(self.ycor() + 5)
+			game.play_sound("jump.wav")
 			
 	def turn_left(self):
-		self.x_acceleration -= 1 
-		if self.x_acceleration < -3:
-			self.x_acceleration = -3
+		self.x_speed = -3 
 
 	def turn_right(self):
-		self.x_acceleration += 1 
-		if self.x_acceleration > 3:
-			self.x_acceleration = 1
+		self.x_speed = 3 
 
 class Rock(spgl.Sprite):
 	def __init__(self, shape, color, x, y):
@@ -87,43 +78,65 @@ class Pipe(spgl.Sprite):
 		spgl.Sprite.__init__(self, shape, color, x, y) 
 		self.speed = 1
 		
+class Donkeykong(spgl.Sprite): 
+	def __init__(self, shape, color, x, y):
+		spgl.Sprite.__init__(self, shape, color, x, y) 
+		
+class Peach(spgl.Sprite): 
+	def __init__(self, shape, color, x, y):
+		spgl.Sprite.__init__(self, shape, color, x, y) 		
+
 # Create Functions
 
 # Initial Game setup
-game = spgl.Game(800, 600, "black", "Sana Kureshi - SUICIDAL MARIO", 1)
+game = spgl.Game(800, 600, "black", "Sana Kureshi - SUICIDAL MARIO", 0)
 game.coins = 10
 game.gravity = -0.3
+game.play_sound("theme_song.wav -v 0.6", 10) 
 
 # Create Sprites / player
 player = Player("triangle", "white", 300, -250)
-player.set_image("mario.gif", 50, 60)
+player.set_image("mario.gif", 25, 30)
 
 pipe = Pipe("triangle", "blue", 300, -250)
 pipe.set_image("pipe.gif", 80, 80)
 
+#ROCKS
 rock = Rock("circle", "red", 110, -55)
 rock.set_image("rock.gif", 25, 25)
 
+rock = Rock("circle", "red", 155, -100)
+rock.set_image("rock.gif", 25, 25)
+	
 #BLOCKS
-block = Block("square", "blue", 150 , -100)
-block.set_image("brick2.gif", 150, 50)
-
-block = Block("triangle", "red", 210, 50)
-block.set_image("brick3.gif", 150, 50) 
-
-block = Block("triangle", "red", -200, -150)
-block.set_image("brick2.gif", 150, 50) 
-
-block = Block("triangle", "red", -180, 200)
-block.set_image("brick3.gif", 150, 50) 
+blocks = []
+blocks.append(Block("brick2.gif", "blue", 150 , -100))
+blocks.append(Block("brick3.gif", "red", 210, 50))
+blocks.append(Block("brick2.gif", "red", -200, -150))
+blocks.append(Block("brick3.gif", "red",  -180, 200))
+blocks.append(Block("brick2.gif", "red",  -230, 30)) 
+blocks.append(Block("brick2.gif", "red",  260, 200))
+ 
+for block in blocks:
+	block.set_bounding_box(75, 25)
 
 #COINS
-coin = Coin("circle", "red", -200, 150) 
-coin.set_image("coins.gif", 30, 20) 
+coins = []
+coins.append(Coin("coins.gif", "blue", -150, 250))
+coins.append(Coin("coins.gif", "blue", 200 , 95))
+coins.append(Coin("coins.gif", "blue",  -240, 75))
+coins.append(Coin("coins.gif", "blue", -180 , 250))
 
-coin = Coin("circle", "blue", 200 , 95) 
-coin.set_image("coins.gif", 30, 20) 
+for coin in coins: 
+	coin.set_bounding_box (30, 20)
+	
+#peach and donkeykong
+donkeykong = Donkeykong("circle", "red", 255, 255)
+donkeykong.set_image("donkeykong.gif", 50, 60) 
 
+peach = Peach("circle", "red", 310, 250)
+peach.set_image("peach.gif", 50, 70) 
+ 
 # Create Labels
 score_label = spgl.Label("Score : {}".format(game.coins), "white", -380, 280)
 game.set_background("background.gif")
@@ -152,7 +165,7 @@ while True:
 	else: 
 		player.score += 0 
 		
-	print(player.state)
+	print(player.state, player.y_acceleration, player.y_speed)
     	
     
     
