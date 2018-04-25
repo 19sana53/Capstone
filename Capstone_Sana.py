@@ -20,7 +20,7 @@ class Player(spgl.Sprite):
 		self.x_acceleration = 0 
 		self.y_speed = 4
 		self.x_speed = 0
-		self.strength = 6
+		self.strength = 3
 		self.score 
 		self.state = "running" 
 		self.frame = 0 
@@ -89,7 +89,7 @@ class Peach(spgl.Sprite):
 # Create Functions
 
 # Initial Game setup
-game = spgl.Game(800, 600, "black", "Sana Kureshi - SUICIDAL MARIO", 0)
+game = spgl.Game(800, 600, "black", "Sana Kureshi - SKYDIVER MARIO", 0)
 game.coins = 10
 game.gravity = -0.3
 game.play_sound("theme_song.wav -v 0.6", 10) 
@@ -97,6 +97,12 @@ game.play_sound("theme_song.wav -v 0.6", 10)
 # Create Sprites / player
 player = Player("triangle", "white", 300, -250)
 player.set_image("mario.gif", 25, 30)
+
+donkeykong = Donkeykong("circle", "red", 255, 255)
+donkeykong.set_image("donkeykong.gif", 50, 60) 
+
+peach = Peach("circle", "red", 310, 250)
+peach.set_image("peach.gif", 50, 70) 
 
 pipe = Pipe("triangle", "blue", 300, -250)
 pipe.set_image("pipe.gif", 80, 80)
@@ -130,12 +136,6 @@ coins.append(Coin("coins.gif", "blue", -180 , 250))
 for coin in coins: 
 	coin.set_bounding_box (30, 20)
 	
-#peach and donkeykong
-donkeykong = Donkeykong("circle", "red", 255, 255)
-donkeykong.set_image("donkeykong.gif", 50, 60) 
-
-peach = Peach("circle", "red", 310, 250)
-peach.set_image("peach.gif", 50, 70) 
  
 # Create Labels
 score_label = spgl.Label("Score : {}".format(game.coins), "white", -380, 280)
@@ -156,14 +156,19 @@ while True:
 		player.goto(300, -250)
 	else:
 		player.score += 0
-	
-	#coin should disappear once hit 
+		
 	if game.is_collision(player, coin):  
 		player.score += 10
 		score_label.update("Score: {}".format(player.score))
 		player.goto()
 	else: 
 		player.score += 0 
+		
+	if game.is_collision(player, donkeykong): 
+		player.score += 10
+		score_label.update("Score: {}".format(player.score))
+	else: 
+		player.score += 0
 		
 	print(player.state, player.y_acceleration, player.y_speed)
     	
