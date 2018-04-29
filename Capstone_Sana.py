@@ -5,6 +5,7 @@
 
 # Import SPGL
 import spgl
+import os 
 
 # Create Classes
 class Player(spgl.Sprite):
@@ -119,10 +120,10 @@ class Peach(spgl.Sprite):
 		spgl.Sprite.__init__(self, shape, color, x, y) 	
 		
 # Initial Game setup
-game = spgl.Game(800, 600, "black", "Sana Kureshi - SUPER MARIO BROS.", 0)
+game = spgl.Game(800, 600, "black", "Sana Kureshi - SUPER MARIO BROS.", 7)
 game.coins = 10
 game.gravity = -0.3
-game.play_sound("background_sound.wav -v 0.6") 
+game.play_sound("background_sound.wav -v 0.6", 57) 
 
 # Create Sprites / player
 player = Player("triangle", "white", 300, -250)
@@ -168,7 +169,6 @@ coins.append(Coin("coins.gif", "blue",  -240, 75))
 coins.append(Coin("coins.gif", "blue", -180 , 250))
 coins.append(Coin("coins.gif", "blue", 40, 45))
 
-
 for coin in coins: 
 	coin.set_bounding_box (30, 20)
 
@@ -183,6 +183,8 @@ game.set_keyboard_binding(spgl.KEY_RIGHT, player.turn_right)
 game.set_keyboard_binding(game.exit, "q")
 
 while True:
+	os.system("clear") 
+	
     # Call the game tick method
 	game.tick()
 	
