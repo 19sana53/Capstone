@@ -38,7 +38,25 @@ class Player(spgl.Sprite):
 				self.y_acceleration = 0 
 				self.y_speed = 0 
 				self.sety(block.ycor() + block.height)
-				self.state = "running"	
+				self.state = "running"
+		
+		for rock in rocks: 
+			if game.is_collision(self, rock) and self.ycor() > rock.ycor():
+				print("ROCK COLLISION")
+				self.y_acceleration = 0 
+				self.y_speed = 0 
+				self.sety(rock.ycor() + rock.height)
+				self.state = "running"
+				player.goto(300, -250)
+				
+		for coin in coins: 
+			if game.is_collision(self, coin) and self.ycor() > coin.ycor():
+				print("COIN COLLISION")
+				self.y_acceleration = 0 
+				self.y_speed = 0 
+				self.sety(coin.ycor() + coin.height)
+				self.state = "running"
+				#game.play_sound("coin.wav -v 0.1")
 		
 		if game.is_collision(self, pipe):
 			print("PIPE COLLISION")
@@ -91,13 +109,13 @@ class Donkeykong(spgl.Sprite):
 		
 class Peach(spgl.Sprite): 
 	def __init__(self, shape, color, x, y):
-		spgl.Sprite.__init__(self, shape, color, x, y) 		
-
+		spgl.Sprite.__init__(self, shape, color, x, y) 	
+		
 # Initial Game setup
-game = spgl.Game(800, 600, "black", "Sana Kureshi - SUPER MARIO BROS.", 6)
+game = spgl.Game(800, 600, "black", "Sana Kureshi - SUPER MARIO BROS.", 0)
 game.coins = 10
 game.gravity = -0.3
-game.play_sound("background_sound.wav") 
+game.play_sound("background_sound.wav -v 0.6") 
 
 # Create Sprites / player
 player = Player("triangle", "white", 300, -250)
@@ -145,7 +163,7 @@ for coin in coins:
 	coin.set_bounding_box (30, 20)
 
 # Create Labels
-score_label = spgl.Label("SCORE : {}".format(game.coins), "white", -380, 280)
+score_label = spgl.Label("SCORE : {}".format(game.coins), "white", -360, 260, font_size = 20)
 game.set_background("background.gif")
 
 # Set Keyboard Bindings
@@ -158,7 +176,7 @@ while True:
 	game.tick()
      
 	if game.is_collision(player, rock): 
-		player.score -= 10
+		player.score -= 20
 		score_label.update("SCORE: {}".format(player.score))
 		player.goto(300, -250)
 	else:
@@ -171,17 +189,11 @@ while True:
 		player.score += 0 
 		
 	if game.is_collision(player, peach): 
-		player.score += 20
+		player.score += 50
 		score_label.update("SCORE: {}".format(player.score))
-	else: 
-		player.score += 0
-		
-	if player.score >= 500:
 		print("MISSION COMPLETE! PEACH IS SAFE WITH MARIO :))") 
 		game.exit()
-		
-	if player.goto == 3: 
-		print("GAME OVER! YOU FAILED") 
-		game.exit()
-			
+	else: 
+		player.score += 0
+	
 	print(player.state, player.xcor(), player.ycor(), player.y_acceleration, player.y_speed)
