@@ -21,7 +21,7 @@ class Player(spgl.Sprite):
 		self.y_speed = 4
 		self.x_speed = 0
 		self.strength = 3
-		self.score 
+		self.score = 10
 		self.state = "running" 
 		self.frame = 0 
 		
@@ -41,22 +41,26 @@ class Player(spgl.Sprite):
 				self.state = "running"
 		
 		for rock in rocks: 
-			if game.is_collision(self, rock) and self.ycor() > rock.ycor():
+			if game.is_collision(self, rock):
 				print("ROCK COLLISION")
 				self.y_acceleration = 0 
 				self.y_speed = 0 
 				self.sety(rock.ycor() + rock.height)
 				self.state = "running"
+				self.score -= 20
 				player.goto(300, -250)
+				score_label.update("SCORE: {}".format(player.score))
 				
 		for coin in coins: 
-			if game.is_collision(self, coin) and self.ycor() > coin.ycor():
+			if game.is_collision(self, coin):
 				print("COIN COLLISION")
 				self.y_acceleration = 0 
 				self.y_speed = 0 
-				self.sety(coin.ycor() + coin.height)
+				coin.destroy()
 				self.state = "running"
-				#game.play_sound("coin.wav -v 0.1")
+				game.play_sound("coin.wav -v 0.1")
+				self.score += 30
+				score_label.update("SCORE: {}".format(self.score)) 
 		
 		if game.is_collision(self, pipe):
 			print("PIPE COLLISION")
@@ -84,7 +88,10 @@ class Player(spgl.Sprite):
 
 	def turn_right(self):
 		self.x_speed = 5
-
+	
+	def end_game(self):
+		game.exit()
+	
 class Rock(spgl.Sprite):
 	def __init__(self, shape, color, x, y):
 		spgl.Sprite.__init__(self, shape, color, x, y)
@@ -121,10 +128,10 @@ game.play_sound("background_sound.wav -v 0.6")
 player = Player("triangle", "white", 300, -250)
 player.set_image("mario.gif", 50, 60)
 
-donkeykong = Donkeykong("circle", "red", 255, 255)
+donkeykong = Donkeykong("circle", "red", 310, 250)
 donkeykong.set_image("donkeykong.gif", 50, 60) 
 
-peach = Peach("circle", "red", 310, 250)
+peach = Peach("circle", "red", 255, 255)
 peach.set_image("peach.gif", 50, 70) 
 
 pipe = Pipe("triangle", "blue", 300, -250)
@@ -135,6 +142,7 @@ rocks = []
 rocks.append(Rock("rock.gif", "red", 140, -110))
 rocks.append(Rock("rock.gif", "red", 250, 90))
 rocks.append(Rock("rock.gif", "red", -210, 240))
+rocks.append(Rock("rock.gif", "red", -210, 75))
 
 for rock in rocks: 
 	rock.set_bounding_box(25, 25)
@@ -158,6 +166,8 @@ coins.append(Coin("coins.gif", "blue", -150, 250))
 coins.append(Coin("coins.gif", "blue", 200 , 95))
 coins.append(Coin("coins.gif", "blue",  -240, 75))
 coins.append(Coin("coins.gif", "blue", -180 , 250))
+coins.append(Coin("coins.gif", "blue", 40, 45))
+
 
 for coin in coins: 
 	coin.set_bounding_box (30, 20)
@@ -170,24 +180,12 @@ game.set_background("background.gif")
 game.set_keyboard_binding(spgl.KEY_SPACE, player.jump)
 game.set_keyboard_binding(spgl.KEY_LEFT, player.turn_left)
 game.set_keyboard_binding(spgl.KEY_RIGHT, player.turn_right)
+game.set_keyboard_binding(game.exit, "q")
 
 while True:
     # Call the game tick method
 	game.tick()
-     
-	if game.is_collision(player, rock): 
-		player.score -= 20
-		score_label.update("SCORE: {}".format(player.score))
-		player.goto(300, -250)
-	else:
-		player.score += 0
-		
-	if game.is_collision(player, coin):  
-		player.score += 10
-		score_label.update("SCORE: {}".format(player.score))
-	else: 
-		player.score += 0 
-		
+	
 	if game.is_collision(player, peach): 
 		player.score += 50
 		score_label.update("SCORE: {}".format(player.score))
