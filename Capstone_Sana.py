@@ -59,7 +59,7 @@ class Player(spgl.Sprite):
 			self.y_acceleration += self.strength
 			self.state = "jumping"
 			self.sety(self.ycor() + 5)
-			game.play_sound("jump.wav")
+			game.play_sound("jump.wav -v 0.2")
 			
 	def turn_left(self):
 		self.x_speed = -5 
@@ -93,13 +93,11 @@ class Peach(spgl.Sprite):
 	def __init__(self, shape, color, x, y):
 		spgl.Sprite.__init__(self, shape, color, x, y) 		
 
-# Create Functions
-
 # Initial Game setup
-game = spgl.Game(800, 600, "black", "Sana Kureshi - SUPER MARIO BROS.", 5)
+game = spgl.Game(800, 600, "black", "Sana Kureshi - SUPER MARIO BROS.", 6)
 game.coins = 10
 game.gravity = -0.3
-game.play_sound("theme_song.wav -v 0.6", 10) 
+game.play_sound("background_sound.wav") 
 
 # Create Sprites / player
 player = Player("triangle", "white", 300, -250)
@@ -147,7 +145,7 @@ for coin in coins:
 	coin.set_bounding_box (30, 20)
 
 # Create Labels
-score_label = spgl.Label("Score : {}".format(game.coins), "white", -380, 280)
+score_label = spgl.Label("SCORE : {}".format(game.coins), "white", -380, 280)
 game.set_background("background.gif")
 
 # Set Keyboard Bindings
@@ -160,7 +158,7 @@ while True:
 	game.tick()
      
 	if game.is_collision(player, rock): 
-		player.score -= 5
+		player.score -= 10
 		score_label.update("SCORE: {}".format(player.score))
 		player.goto(300, -250)
 	else:
@@ -178,4 +176,12 @@ while True:
 	else: 
 		player.score += 0
 		
+	if player.score >= 500:
+		print("MISSION COMPLETE! PEACH IS SAFE WITH MARIO :))") 
+		game.exit()
+		
+	if player.goto == 3: 
+		print("GAME OVER! YOU FAILED") 
+		game.exit()
+			
 	print(player.state, player.xcor(), player.ycor(), player.y_acceleration, player.y_speed)
