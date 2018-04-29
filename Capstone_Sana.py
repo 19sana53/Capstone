@@ -120,7 +120,7 @@ class Peach(spgl.Sprite):
 		spgl.Sprite.__init__(self, shape, color, x, y) 	
 		
 # Initial Game setup
-game = spgl.Game(800, 600, "black", "Sana Kureshi - SUPER MARIO BROS.", 7)
+game = spgl.Game(800, 600, "black", "Sana Kureshi - SUPER MARIO BROS.", 15)
 game.coins = 10
 game.gravity = -0.3
 game.play_sound("background_sound.wav -v 0.6", 57) 
